@@ -3,4 +3,4 @@ this is a fork of pombadevs fancy linux prompt for openBSD ksh, sh and zsh (but 
 
 
 # install 
-
+ftp https://raw.githubusercontent.com/hexisXz/fancy-openBSD-prompt/main/install.sh && chmod +x install.sh && sh install.sh 
