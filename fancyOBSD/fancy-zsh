@@ -1,0 +1,116 @@
+#!/bin/zsh
+
+__powerline() {
+    # Unicode symbols
+    GIT_BRANCH_CHANGED_SYMBOL='+'
+    GIT_NEED_PULL_SYMBOL='⇣'
+    GIT_NEED_PUSH_SYMBOL='⇡'
+
+    # Colors 
+    BG_BASE00="%K{11}"
+    BG_BASE01="%K{10}"
+    BG_BASE02="%K{0}"
+    BG_BASE03="%K{8}"
+    BG_BASE0="%K{12}"
+    BG_BASE1="%K{14}"
+    BG_BASE2="%K{7}"
+    BG_BASE3="%K{15}"
+    BG_BLUE="%K{4}"
+    BG_COLOR1="%K{240}"
+    BG_COLOR2="%K{238}"
+    BG_COLOR3="%K{238}"
+    BG_COLOR4="%K{31}"
+    BG_COLOR5="%K{31}"
+    BG_COLOR6="%K{237}"
+    BG_COLOR7="%K{237}"
+    BG_COLOR8="%K{161}"
+    BG_COLOR9="%K{161}"
+    BG_CYAN="%K{6}"
+    BG_GREEN="%K{2}"
+    BG_MAGENTA="%K{5}"
+    BG_ORANGE="%K{9}"
+    BG_RED="%K{1}"
+    BG_VIOLET="%K{13}"
+    BG_YELLOW="%K{3}"
+    BOLD="%B"
+    DIM="%F{240}"
+    FG_BASE00="%F{11}"
+    FG_BASE01="%F{10}"
+    FG_BASE02="%F{0}"
+    FG_BASE03="%F{8}"
+    FG_BASE0="%F{12}"
+    FG_BASE1="%F{14}"
+    FG_BASE2="%F{7}"
+    FG_BASE3="%F{15}"
+    FG_BLUE="%F{4}"
+    FG_COLOR1="%F{250}"
+    FG_COLOR2="%F{240}"
+    FG_COLOR3="%F{250}"
+    FG_COLOR4="%F{238}"
+    FG_COLOR6="%F{31}"
+    FG_COLOR7="%F{250}"
+    FG_COLOR8="%F{237}"
+    FG_COLOR9="%F{161}"
+    FG_CYAN="%F{6}"
+    FG_GREEN="%F{2}"
+    FG_MAGENTA="%F{5}"
+    FG_ORANGE="%F{9}"
+    FG_RED="%F{1}"
+    FG_VIOLET="%F{13}"
+    FG_YELLOW="%F{3}"
+    RESET="%f%k%F"
+    REVERSE="%S%F{reverse}%s"
+
+    __git_info() {
+        # Check if the current directory is a git repository
+        [ -d .git ] || return
+
+        # Get the current branch or short SHA1 hash
+        branch=$(git symbolic-ref --short HEAD 2>/dev/null || git describe --tags --always 2>/dev/null)
+        [ -n "$branch" ] || return
+
+        # Get ahead/behind information from git status
+        stats=$(git status --porcelain --branch 2>/dev/null | grep '^##' | grep -o '\[.*\]$')
+        aheadN=$(echo "$stats" | grep -o 'ahead [0-9]*' | grep -o '[0-9]*')
+        behindN=$(echo "$stats" | grep -o 'behind [0-9]*' | grep -o '[0-9]*')
+
+        marks=""
+        [ -n "$aheadN" ] && marks=" $GIT_NEED_PUSH_SYMBOL$aheadN"
+        [ -n "$behindN" ] && marks="$marks $GIT_NEED_PULL_SYMBOL$behindN"
+
+        # Check if there are local changes
+        if [ -n "$(git status --porcelain 2>/dev/null)" ]; then
+            printf "%s" "${BG_COLOR8}$RESET$BG_COLOR8 $branch$marks $FG_COLOR9"
+        else
+            printf "%s" "${BG_BLUE}$RESET$BG_BLUE $branch$marks $RESET$FG_BLUE"
+        fi
+    }
+
+    ps1() {
+        # Set the prompt color based on the exit status of the previous command
+        if [ "$?" -eq 0 ]; then
+            BG_EXIT="$BG_GREEN"
+            FG_EXIT="$FG_GREEN"
+        else
+            BG_EXIT="$BG_RED"
+            FG_EXIT="$FG_RED"
+        fi
+
+        PS1="$FG_COLOR1"
+        PS1="$PS1$BG_COLOR5 %~ "
+        PS1="$PS1$RESET${FG_COLOR6}"
+        PS1="$PS1$(__git_info)"
+        PS1="$PS1$BG_EXIT$RESET"
+        PS1="$PS1$BG_EXIT$FG_BASE3 $RESET${FG_EXIT}${RESET} "
+        export PS1
+    }
+
+    # Directly update PS1 on sourcing
+    ps1
+}
+
+# Check if the shell is interactive
+case "$-" in
+    *i*) __powerline ;;
+esac
+unset __powerline

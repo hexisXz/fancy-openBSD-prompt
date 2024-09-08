@@ -1,0 +1,3 @@
+. ~/.config/fancyOBSD/fancy-ksh.ksh
+
+eval "$(zoxide init posix --hook prompt)"
